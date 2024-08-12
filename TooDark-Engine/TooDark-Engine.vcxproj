@@ -71,11 +71,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>F:\Uni_work\Year2\SHOT\TooDark-Engine\thirdparty\imgui;F:\Uni_work\Year2\SHOT\TooDark-Engine\thirdparty\SDL2\include;$(IncludePath)</IncludePath>
+    <IncludePath>F:\Uni_work\Year2\SHOT\TooDark-Engine\thirdparty\imgui;F:\Uni_work\Year2\SHOT\TooDark-Engine\thirdparty\SDL2\include;F:\Uni_work\Year2\SHOT\TooDark-Engine\thirdparty\glm;$(IncludePath)</IncludePath>
     <LibraryPath>F:\Uni_work\Year2\SHOT\TooDark-Engine\thirdparty\SDL2\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>F:\Uni_work\Year2\SHOT\TooDark-Engine\thirdparty\imgui;F:\Uni_work\Year2\SHOT\TooDark-Engine\thirdparty\SDL2\include;$(IncludePath)</IncludePath>
+    <IncludePath>F:\Uni_work\Year2\SHOT\TooDark-Engine\thirdparty\imgui;F:\Uni_work\Year2\SHOT\TooDark-Engine\thirdparty\SDL2\include;F:\Uni_work\Year2\SHOT\TooDark-Engine\thirdparty\glm;$(IncludePath)</IncludePath>
     <LibraryPath>F:\Uni_work\Year2\SHOT\TooDark-Engine\thirdparty\SDL2\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -146,6 +146,8 @@
     <ClCompile Include="..\thirdparty\imgui\imgui_impl_sdlrenderer2.cpp" />
     <ClCompile Include="..\thirdparty\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\thirdparty\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Framework.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -236,6 +238,9 @@
     <ClInclude Include="..\thirdparty\SDL2\include\SDL_version.h" />
     <ClInclude Include="..\thirdparty\SDL2\include\SDL_video.h" />
     <ClInclude Include="..\thirdparty\SDL2\include\SDL_vulkan.h" />
+    <ClInclude Include="Consts.h" />
+    <ClInclude Include="Framework.h" />
+    <ClInclude Include="GameObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
