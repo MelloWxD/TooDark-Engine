@@ -146,6 +146,7 @@
     <ClCompile Include="..\thirdparty\imgui\imgui_impl_sdlrenderer2.cpp" />
     <ClCompile Include="..\thirdparty\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\thirdparty\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="engine.cpp" />
     <ClCompile Include="Framework.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
@@ -239,6 +240,7 @@
     <ClInclude Include="..\thirdparty\SDL2\include\SDL_video.h" />
     <ClInclude Include="..\thirdparty\SDL2\include\SDL_vulkan.h" />
     <ClInclude Include="Consts.h" />
+    <ClInclude Include="engine.h" />
     <ClInclude Include="Framework.h" />
     <ClInclude Include="GameObject.h" />
   </ItemGroup>

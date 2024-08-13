@@ -3,14 +3,22 @@
 
 #include"Framework.h"
 
-
 int main(int argc, char* argv[])
 {
     bool isRunning = true;
     Framework fw;
     // Create some gameobjs
-    fw._vGameObjects.push_back(GameObject(fw.pRenderer, "../Assets/test.png"));
-    fw._vGameObjects.push_back(GameObject(fw.pRenderer, "../Assets/transparent_test.png"));
+    std::string path = "..\\Assets\\";
+
+    for (const auto& entry : std::filesystem::directory_iterator(path))
+    {
+        fw._engine._assetManager.loadTexture(fw.pRenderer, entry.path().string().c_str(), entry.path().filename().stem().string());
+    }
+
+    fw._vGameObjects.push_back(GameObject(&fw, "test"));
+    fw._vGameObjects.push_back(GameObject(&fw, "amogus"));
+    fw._vGameObjects.push_back(GameObject(&fw, "amogus"));
+    fw.player = &fw._vGameObjects[1];
     while (isRunning)
     {
         fw.poll_events(isRunning);
@@ -18,17 +26,14 @@ int main(int argc, char* argv[])
         // New frame setup
         fw.new_frame();
 
-        SDL_SetRenderTarget(fw.pRenderer, fw.texture);
-
-
-        SDL_SetRenderDrawColor(fw.pRenderer, 255, 0, 255, 255);
-
-        SDL_RenderClear(fw.pRenderer);
-
+       // Drawing goes here
 
         for (auto& go : fw._vGameObjects)
         {
-            SDL_RenderCopy(fw.pRenderer, go.imgTex, NULL, &go._rect);
+            go.update();
+            SDL_RenderCopy(fw.pRenderer, go.pTexImg, NULL, &go._rect);
+            SDL_SetRenderDrawColor(fw.pRenderer, 255, 255, 255, 255);
+            SDL_RenderDrawRect(fw.pRenderer, &go._rect);
         }
        
 
