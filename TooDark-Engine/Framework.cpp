@@ -2,19 +2,28 @@
 int xyzw[4] = { 0,0,0,0 };
 float xyzwf[4] = { 0,0,0,0 };
 
-void dragRect(GameObject& go)
+void dragTransform(GameObject& go)
 {
-    xyzw[0] = go._rect.x;
-    xyzw[1] = go._rect.y;
-    xyzw[2] = go._rect.w;
-    xyzw[3] = go._rect.h;
+    xyzw[0] = go.position.x;
+    xyzw[1] = go.position.y;
+    xyzw[2] = go.Scale.x;
+    xyzw[3] = go.Scale.y;
 
-    ImGui::DragInt4("Rect", xyzw, 1, 0, 1500, "%d");
+    ImGui::DragInt2("Position", xyzw, 1, 0, 1500, "%d");
+    ImGui::DragInt2("Scale", &xyzw[2], 1, 0, 1500, "%d");
 
-    go._rect.x = xyzw[0];
-    go._rect.y = xyzw[1];
-    go._rect.w = xyzw[2];
-    go._rect.h = xyzw[3];
+    go.position.x = xyzw[0];
+    go.position.y = xyzw[1];
+    go.Scale.x = xyzw[2];
+    go.Scale.y = xyzw[3];
+}
+
+void Spacing(int space)
+{
+    for (int x = 0 ; x < space; ++x)
+    {
+        ImGui::Spacing();
+    }
 }
 void dragVec4(const char* Label, v4& v, int speed, int min, int max)
 {
@@ -277,9 +286,11 @@ void Framework::poll_events(bool& isRunning)
             }
             
         }
+
+
         ImGui_ImplSDL2_ProcessEvent(&e);
     }
-
+    SDL_GetMouseState(&mX, &mY);
 }
 
 /// <summary>
@@ -309,15 +320,12 @@ void Framework::draw_imgui()
 
     // Draws here
 
-    ImGui::Begin("Inspector", NULL, NULL);
-
-    ImGui::SetWindowPos({0,0});
-    ImGui::End();    
+    
 
     ImGui::Begin("Editor Settings");
     {
         dragVec4("Background Clear Colour", _BgClearClr, 1, 0, 255);
-
+        ImGui::Checkbox("Toggle Gizmos", &drawGizmos);
         ImGui::Text("Style Settings");
        
     }
@@ -325,24 +333,99 @@ void Framework::draw_imgui()
     
     
     ImGui::Begin("Editor Window #2");
+    ImGui::Text("Mouse Pos - %i,%i", mX, mY);
+    
+
+
     ImGui::End();   
  
     ImGui::Begin("Game View");
         ImGui::Image((ImTextureID)pRenderTarget, ImGui::GetContentRegionAvail()); 
     ImGui::End();
+    static int selectedObjId = -1;
 
     ImGui::Begin("Scene Hierarchy");
     {
-        for (auto& GO : _vGameObjects)
+        ImGui::Text("Scene Objects");
+        for (int n = 0; n < _vGameObjects.size(); n++)
         {
-            if (ImGui::TreeNode(GO._name.c_str()))
+            std::string lbl = std::to_string(n) + " - " + _vGameObjects[n]._name;
+
+            if (ImGui::Selectable(lbl.c_str(), selectedObjId == n))
+                selectedObjId = n;
+        }
+    }
+
+    // Edit any selected item
+    ImGui::Begin("Inspector", NULL, NULL);
+    {
+        if (selectedObjId >= 0) // Object chosen
+        {
+            auto& GO = _vGameObjects[selectedObjId];
+
+            //Change the name
+            
+            static std::string password = GO._name;
+            ImGui::InputText("Name", (char*) password.c_str(), IM_ARRAYSIZE(password.c_str()));
+            GO._name = password;
+
+
+            // Transform Edits
+
+            dragTransform(GO);
+
+            Spacing(25);
+            if (ImGui::TreeNode("Animator settings"))
             {
-                dragRect(GO);
+                ImGui::Text("Current Frame - %i", GO._animator._currentFrame);
+                ImGui::Text("Current Animation - %s", GO._animator.pCurrentAnim->name.c_str());
+
+                ImGui::Spacing();
+                ImGui::Spacing();
+
+                ImGui::DragFloat("Animation Speed (s)", &GO._animator.pCurrentAnim->speed, 0.0005f, 0, 10, "%.4f");
+
+                if (ImGui::TreeNode("Change Animation"))
+                {
+                    static int selectedAnimId = 0;
+                    int count = 0;
+                    for (auto& anim : _engine._assetManager._animationMap)
+                    {
+                        std::string lbl = anim.first;
+
+                        if (ImGui::Selectable(lbl.c_str(), selectedAnimId == count))
+                        {
+                            selectedAnimId = count;
+                            GO._animator.pCurrentAnim = &anim.second;
+                        }
+                        ++count;
+                    }
+                    ImGui::TreePop();
+                }
+                if( ImGui::Button("Play Animation"))
+                {
+                    GO._animator.play = true;
+                }
+                ImGui::SameLine();
+                if( ImGui::Button("Stop Animation"))
+                {
+                    GO._animator.play = false;
+                }
+
+          
+
+
                 ImGui::TreePop();
             }
 
+
+
+
+
+
         }
     }
+    ImGui::End();
     ImGui::End();
 
     ImGui::Render();

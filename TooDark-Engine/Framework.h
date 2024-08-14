@@ -31,6 +31,9 @@ struct Framework
     }
     SDL_Window* pWindow;
     SDL_Renderer* pRenderer;
+    int mX, mY;
+
+    bool drawGizmos = false;
     SDL_Texture* pRenderTarget; // Render Target
     Engine _engine;
     GameObject* player;
