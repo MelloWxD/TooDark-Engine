@@ -14,7 +14,7 @@ GameObject::GameObject(Framework* pFw, std::string TextureID, std::string Name, 
 	_animator.pGameObj = this;
 	_animator._vAnimations.push_back(pFw->_engine._assetManager.getAnim("_Attack"));
 	pTexImg = _animator._vAnimations[_animator._currentFrame]._vAnimationSprites[_animator._currentFrame];
-
+	texID = TextureID;
 	_animator.playAnim(0);
 }
 void GameObject::ChangeSprite(SDL_Texture* tx)

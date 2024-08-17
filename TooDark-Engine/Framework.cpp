@@ -361,7 +361,22 @@ void Framework::draw_imgui()
 
     // Draws here
 
-    
+    // draw File menu bar
+    {
+        ImGui::BeginMainMenuBar();
+
+        if (ImGui::BeginMenu("Scene"))
+        {
+            if (ImGui::MenuItem("New GameObject", "CTRL+N"))
+            {
+                _vGameObjects.push_back(GameObject(this, "test", "New Object", v2(50, -50)));
+            }
+           
+            ImGui::EndMenu();
+        }    
+        ImGui::EndMainMenuBar();
+
+    }
 
     ImGui::Begin("Editor Settings");
     {
@@ -423,6 +438,21 @@ void Framework::draw_imgui()
             }
             Spacing(25);
 
+            if (ImGui::TreeNode("Texture settings"))
+            {
+                ImGui::Text("Current Texture ID - %s", GO.texID.c_str());
+
+                for (auto kv : _engine._assetManager._texMap)
+                {
+                    if (ImGui::TreeNode(kv.first.c_str()))
+                    {
+                        GO.texID = kv.first;
+                        GO.pTexImg = _engine._assetManager.getTexture(GO.texID);
+                        ImGui::TreePop();
+                    }
+                }
+                ImGui::TreePop();
+            }
 
             if (ImGui::TreeNode("Animator settings"))
             {

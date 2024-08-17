@@ -1,64 +1,8 @@
 #include "Collision.h"
 #include"GameObject.h"
 
-v2 Collisions::tripleProduct(v2 a, v2 b, v2 c)
-{
-	v3 A = v3(a.x, a.y, 0);
-	v3 B = v3(b.x, b.y, 0);
-	v3 C = v3(c.x, c.y, 0);
 
-	v3 second = glm::cross(glm::cross(A, B), C);
 
-	return v2(second.x, second.y);
-}
-
-bool Collisions::isOverlapping(Collider* lHB, Collider* rHB, CollisionInfo& colInfo)
-{
-	auto Lverts = lHB->getColliderVerts();
-	auto Rverts = rHB->getColliderVerts();
-	v2 Collision_Normal = v2(0);
-
-	bool col = false;
-	for (auto Lpoint : Lverts) // Check diagonals of Polygon
-	{
-		v2 line_r1s = lHB->centre;
-		v2 line_r1e = Lpoint;
-
-		for (int x = 0; x < Rverts.size();++x) // against edges of another
-		{
-			v2 line_r2s = rHB->centre;
-			v2 line_r2e = Rverts[(x+1 ) % Rverts.size()];
-
-			float h = (line_r2e.x - line_r2s.x) * (line_r1s.y - line_r1e.y) - (line_r1s.x - line_r1e.x) * (line_r2e.y - line_r2s.y);
-			float t1 = ((line_r2s.y - line_r2e.y) * (line_r1s.x - line_r2s.x) + (line_r2e.x - line_r2s.x) * (line_r1s.y - line_r2s.y)) / h;
-			float t2 = ((line_r1s.y - line_r1e.y) * (line_r1s.x - line_r2s.x) + (line_r1e.x - line_r1s.x) * (line_r1s.y - line_r2s.y)) / h;
-
-			if (t1 >= 0.0f && t1 < 1.0f && t2 >= 0.0f && t2 < 1.0f)
-			{
-				// If trigger return true immediately
-				col = true;
-
-				// Accumulate all normals
-				Collision_Normal.x += (1.0f - t1) * (line_r1e.x - line_r1s.x);
-				Collision_Normal.y += (1.0f - t1) * (line_r1e.y - line_r1s.y);
-			}
-		}
-	}
-	if (col)
-	{
-		if (Collision_Normal.x > Collision_Normal.y)
-		{
-			Collision_Normal.y = 0;
-		}
-		else
-		{
-			Collision_Normal.x = 0;
-		}
-		colInfo.normal = Collision_Normal;
-		return true;
-	}
-	return false;
-}
 bool Collisions::isOverlappingSAT(Collider* pLHB, Collider* pRHB, CollisionInfo& colInfo)
 {
 
@@ -119,35 +63,19 @@ bool Collisions::isOverlappingSAT(Collider* pLHB, Collider* pRHB, CollisionInfo&
 Collisions::CollisionInfo Collisions::CheckCollisions(GameObject* l_gobj, GameObject* r_gobj)
 {
 	CollisionInfo info;
-	info.pGameObj_l = l_gobj;
-	info.pGameObj_r = r_gobj;
+	
 	
 	if (isOverlappingSAT(&l_gobj->_hitbox, &r_gobj->_hitbox, info))
 	{
+		info.pGameObj_l = l_gobj;
+		info.pGameObj_r = r_gobj;
 		info.HasCollision = true;
 		
 	}
 	return info;
 }
 
-void Collisions::Resolve(CollisionInfo info)
-{
-	auto* obj1 = info.pGameObj_l;
-	auto* obj2 = info.pGameObj_r;
 
-	if (!obj1->_static)
-	{
-		obj1->position.x -= (info.normal.x * 0.5f);
-		obj1->position.y -= (info.normal.y * 0.5f);
-	}
-	if (!obj2->_static)
-	{
-		obj2->position.x += (info.normal.x * 0.5f);
-		obj2->position.y += (info.normal.y * 0.5f);
-	}
-	obj1->_hitbox.update(obj1->position);
-	obj2->_hitbox.update(obj2->position);
-}
 void Collisions::ResolveSAT(CollisionInfo info)
 {
 	auto* obj1 = info.pGameObj_l;
@@ -162,29 +90,31 @@ void Collisions::ResolveSAT(CollisionInfo info)
 	}
 	if (!obj1->_static)
 	{
-		if (obj1->position.y > obj2->position.y) // i.e. ob1 is below obj2
-		{
-			obj1->position.y += (fabs(info.normal.y) * 0.5f); // move it down
-		}
-		else // obj1 above obj 2
-		{
-			obj1->position.y -= (fabs(info.normal.y) * 0.5f); //// move ut up
+		//if (obj1->position.y > obj2->position.y) // i.e. ob1 is below obj2
+		//{
+		//	obj1->position.y += (fabs(info.normal.y) * 0.5f); // move it down
+		//}
+		//else // obj1 above obj 2
+		//{
+		//	obj1->position.y -= (fabs(info.normal.y) * 0.5f); //// move ut up
 
-		}
+		//}
 		obj1->position.x += (info.normal.x * info.Depth) * 0.5f;
+		obj1->position.y += (info.normal.y * info.Depth) * 0.5f;
 	}
 	if (!obj2->_static)
 	{
-		if (obj2->position.y < obj1->position.y) // i.e. ob1 is below obj2
-		{
-			obj2->position.y -= (fabs(info.normal.y) * 0.5f); // move it down
-		}
-		else
-		{
-			obj2->position.y += (fabs(info.normal.y) * 0.5f); //// move ut up
+		//if (obj2->position.y < obj1->position.y) // i.e. ob1 is below obj2
+		//{
+		//	obj2->position.y -= (fabs(info.normal.y) * 0.5f); // move it down
+		//}
+		//else
+		//{
+		//	obj2->position.y += (fabs(info.normal.y) * 0.5f); //// move ut up
 
-		}
-		obj2->position.x -= (info.normal.x * info.Depth) * 0.5f;
+		//}
+		obj2->position.x += (-info.normal.x * info.Depth) * 0.5f;
+		obj2->position.y += (-info.normal.y * info.Depth) * 0.5f;
 	}
 	obj1->_hitbox.update(obj1->position);
 	obj2->_hitbox.update(obj2->position);
@@ -263,6 +193,7 @@ Collisions::Triangle::Triangle()
 	t1 = _verts[0];
 	t2 = _verts[1];
 	t3 = _verts[2];
+	_type = ColliderType::kTriangle;
 }
 
 Collisions::Triangle::Triangle(v2 a, v2 b, v2 c)
@@ -273,6 +204,7 @@ Collisions::Triangle::Triangle(v2 a, v2 b, v2 c)
 	t1 = _verts[0];
 	t2 = _verts[1];
 	t3 = _verts[2];
+	_type = ColliderType::kTriangle;
 }
 
 void Collisions::Triangle::update(v2 Parent_Pos)
@@ -282,6 +214,36 @@ void Collisions::Triangle::update(v2 Parent_Pos)
 }
 
 std::vector<v2> Collisions::Triangle::getColliderVerts()
+{
+	return _verts;
+}
+
+Collisions::Polygon::Polygon(std::vector<v2> Points)
+{
+	_type = kPolygon;
+	for (auto& v : Points)
+	{
+		AddPoint(v);
+	}
+}
+
+Collisions::Polygon::Polygon()
+{
+	_type = kPolygon;
+
+}
+
+void Collisions::Polygon::AddPoint(v2 point)
+{
+	_verts.push_back(point);
+}
+
+void Collisions::Polygon::removePoint(int idx)
+{
+	_verts.erase(_verts.begin() + idx);
+}
+
+std::vector<v2> Collisions::Polygon::getColliderVerts()
 {
 	return _verts;
 }

@@ -17,6 +17,7 @@ public:
 	void update();
 	SDL_Texture* pTexImg;
 	std::string _name;
+	std::string texID;
 	v2 position = v2(0, 0);
 	v2 velocity = v2(0, 0);
 	v2 Scale = v2(100, 200);

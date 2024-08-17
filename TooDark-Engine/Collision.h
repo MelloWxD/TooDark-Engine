@@ -21,6 +21,7 @@ namespace Collisions
 		kCircle = 1u,
 		kTriangle = 2u,
 		kAABB = 3u,
+		kPolygon = 4u,
 		kOBB = 4u
 	};
 
@@ -75,6 +76,15 @@ namespace Collisions
 		
 
 		v2 extents;
+	};
+
+	class Polygon : virtual public Collider
+	{
+		Polygon(std::vector<v2> Points);
+		Polygon();
+		void AddPoint(v2 point);
+		void removePoint(int idx);
+		std::vector<v2> getColliderVerts();
 	};
 	bool isOverlappingSAT(Collider* lHB, Collider* rHB, CollisionInfo& colInfo);
 	CollisionInfo CheckCollisions(GameObject* l_gobj, GameObject* r_gobj);

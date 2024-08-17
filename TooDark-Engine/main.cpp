@@ -34,8 +34,7 @@ int main(int argc, char* argv[])
 
     fw._vGameObjects.push_back(GameObject(&fw, "test"));
     fw._vGameObjects.push_back(GameObject(&fw, "amogus"));
-   // fw._vGameObjects[1].anim = fw._engine._assetManager.getAnim("_Attack");
-    //fw._vGameObjects.push_back(GameObject(&fw, "amogus"));
+   
     fw.player = &fw._vGameObjects[1];
 
     fw._vGameObjects[1].position = v2(150, 0);
