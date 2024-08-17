@@ -10,6 +10,7 @@ int main(int argc, char* argv[])
     // Create some gameobjs
     std::string path = "..\\Assets\\";
 
+    // Load Assets
     for (const auto& entry : std::filesystem::directory_iterator(path))
     {
         if (entry.is_directory()) // Check for Directories
@@ -34,8 +35,12 @@ int main(int argc, char* argv[])
     fw._vGameObjects.push_back(GameObject(&fw, "test"));
     fw._vGameObjects.push_back(GameObject(&fw, "amogus"));
    // fw._vGameObjects[1].anim = fw._engine._assetManager.getAnim("_Attack");
-    fw._vGameObjects.push_back(GameObject(&fw, "amogus"));
+    //fw._vGameObjects.push_back(GameObject(&fw, "amogus"));
     fw.player = &fw._vGameObjects[1];
+
+    fw._vGameObjects[1].position = v2(150, 0);
+    fw._vGameObjects[0].position = v2(0, 0);
+    // main loop
     while (isRunning)
     {
         fw.poll_events(isRunning);
@@ -45,21 +50,59 @@ int main(int argc, char* argv[])
 
        // Drawing goes here
 
+        for (int x = 0; x < fw._vGameObjects.size(); ++x)
+        {
+            for (int y = 0; y < fw._vGameObjects.size(); ++y)
+            {
+                if (x == y)
+                {
+                    continue;
+                }
+                auto info = Collisions::CheckCollisions(&fw._vGameObjects[x], &fw._vGameObjects[y]);
+                if (info.HasCollision)
+                {
+                    Collisions::ResolveSAT(info);
+                    fw._vGameObjects[x].col = true;
+                    fw._vGameObjects[y].col = true;
+                }
+                else
+                {
+                    fw._vGameObjects[x].col = false;
+                    fw._vGameObjects[y].col = false;
+                }
+               
+            }
+        }
         for (auto& go : fw._vGameObjects)
         {
+           
             go.update();
             SDL_RenderCopy(fw.pRenderer, go.pTexImg, NULL, &go._rect);
-            SDL_SetRenderDrawColor(fw.pRenderer, 255, 255, 255, 255);
+          
             if (fw.drawGizmos)
             {
-                SDL_RenderDrawRect(fw.pRenderer, &go._rect);
+                auto r = go._hitbox.getRect();
+
+                SDL_SetRenderDrawColor(fw.pRenderer, 0, 0, 255, 255);
+                SDL_RenderDrawPoint(fw.pRenderer, go._hitbox.centre.x, go._hitbox.centre.y);
+                for (auto& v : go._hitbox.getColliderVerts())
+                {
+                    SDL_RenderDrawPoint(fw.pRenderer, v.x, v.y);
+                }
+                SDL_SetRenderDrawColor(fw.pRenderer, 255, 255, 255, 255);
+                (go.col) ? SDL_SetRenderDrawColor(fw.pRenderer, 0, 255, 0, 255) : SDL_SetRenderDrawColor(fw.pRenderer, 255, 0, 0, 255);
+
+
+
+                SDL_RenderDrawRect(fw.pRenderer, &r);
+                //SDL_RenderDrawPointF(fw.pRenderer, go.position.x, go.position.y);
             }
         }
        
 
 
         SDL_SetRenderTarget(fw.pRenderer, NULL);
-        
+        // draws outside the viewport go here
 
         fw.draw_imgui();
 

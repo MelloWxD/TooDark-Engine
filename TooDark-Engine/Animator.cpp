@@ -18,7 +18,7 @@ void Animator::update()
 			Clock.setStartTimePointNow();
 			next = false;
 		}
-		float f = Clock.getTimeSinceStart();
+		int f = Clock.getTimeSinceStart();
 		if (f >= pCurrentAnim->speed)
 		{
 			_currentFrame = (_currentFrame + 1) % (pCurrentAnim->_vAnimationSprites.size());

@@ -1,7 +1,14 @@
 #include "Framework.h"
 int xyzw[4] = { 0,0,0,0 };
+int arr[4] = { 0,0,0,0 };
 float xyzwf[4] = { 0,0,0,0 };
-
+void Spacing(int space)
+{
+    for (int x = 0; x < space; ++x)
+    {
+        ImGui::Spacing();
+    }
+}
 void dragTransform(GameObject& go)
 {
     xyzw[0] = go.position.x;
@@ -9,22 +16,56 @@ void dragTransform(GameObject& go)
     xyzw[2] = go.Scale.x;
     xyzw[3] = go.Scale.y;
 
-    ImGui::DragInt2("Position", xyzw, 1, 0, 1500, "%d");
-    ImGui::DragInt2("Scale", &xyzw[2], 1, 0, 1500, "%d");
+    ImGui::DragInt2("Position", xyzw, 1, -1000, 1500, "%d");
+    ImGui::DragInt2("Scale", &xyzw[2], 1, -1000, 1500, "%d");
 
     go.position.x = xyzw[0];
     go.position.y = xyzw[1];
     go.Scale.x = xyzw[2];
     go.Scale.y = xyzw[3];
 }
-
-void Spacing(int space)
+void dragHitbox(GameObject& go)
 {
-    for (int x = 0 ; x < space; ++x)
-    {
-        ImGui::Spacing();
-    }
+    arr[0] = go._hitbox.extents.x;
+    arr[1] = go._hitbox.extents.y;
+    arr[2] = go._hitbox.offset.x;
+    arr[3] = go._hitbox.offset.y;
+
+    ImGui::DragInt2("Extents", arr, 1, -1000, 1500, "%d");
+    Spacing(2);
+    ImGui::DragInt2("Offset", &arr[2], 1, -1000, 1500, "%d");
+
+    go._hitbox.extents.x = arr[0];
+    go._hitbox.extents.y = arr[1];
+    go._hitbox.offset.x = arr[2];
+    go._hitbox.offset.y = arr[3];
+
+
 }
+void dragVec2(const char* Label, v2& v, int speed, int min, int max)
+{
+    xyzw[0] = v.x;
+    xyzw[1] = v.y;
+
+
+    ImGui::DragInt2(Label, xyzw, speed, min, max);
+
+    v.x = xyzw[0];
+    v.y = xyzw[1];
+}
+
+void dragAABBHitbox(GameObject& go)
+{
+    auto& hb = go._hitbox;
+ 
+    dragVec2("Extents", hb.extents, 0.5f, -FLT_MAX, FLT_MAX);
+    Spacing(3);
+    dragVec2("Offset", hb.offset, 0.5f, -FLT_MAX, FLT_MAX);
+
+   
+}
+
+
 void dragVec4(const char* Label, v4& v, int speed, int min, int max)
 {
     xyzw[0] = v.x;
@@ -363,18 +404,26 @@ void Framework::draw_imgui()
         {
             auto& GO = _vGameObjects[selectedObjId];
 
-            //Change the name
-            
-            static std::string password = GO._name;
-            ImGui::InputText("Name", (char*) password.c_str(), IM_ARRAYSIZE(password.c_str()));
-            GO._name = password;
-
+            // Name Editor
+            {
+                static std::string password = GO._name;
+                ImGui::InputText("Name", (char*)password.c_str(), IM_ARRAYSIZE(password.c_str()));
+                GO._name = password;
+            }
 
             // Transform Edits
-
-            dragTransform(GO);
-
+            if (ImGui::TreeNode("Transform Editor"))
+            {
+                if (ImGui::Button("Move to Origin"))
+                {
+                    GO.position = v2(0);
+                }
+                dragTransform(GO);
+                ImGui::TreePop();
+            }
             Spacing(25);
+
+
             if (ImGui::TreeNode("Animator settings"))
             {
                 ImGui::Text("Current Frame - %i", GO._animator._currentFrame);
@@ -383,7 +432,7 @@ void Framework::draw_imgui()
                 ImGui::Spacing();
                 ImGui::Spacing();
 
-                ImGui::DragFloat("Animation Speed (s)", &GO._animator.pCurrentAnim->speed, 0.0005f, 0, 10, "%.4f");
+                ImGui::DragInt("Animation Speed (s)", &GO._animator.pCurrentAnim->speed, 1, 0, INT32_MAX, "%d");
 
                 if (ImGui::TreeNode("Change Animation"))
                 {
@@ -418,6 +467,28 @@ void Framework::draw_imgui()
                 ImGui::TreePop();
             }
 
+
+            if (ImGui::TreeNode("Hitbox Editor"))
+            { 
+                ImGui::Checkbox("Static?", &GO._static);
+
+                dragHitbox(GO);
+                switch (GO._hitbox._type)
+                {
+                case Collisions::ColliderType::kAABB:
+                   
+                    break;
+
+
+
+              
+                }
+
+
+
+                ImGui::TreePop();
+
+            }
 
 
 

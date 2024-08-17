@@ -148,6 +148,7 @@
     <ClCompile Include="..\thirdparty\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Animator.cpp" />
     <ClCompile Include="AssetManager.cpp" />
+    <ClCompile Include="Collision.cpp" />
     <ClCompile Include="engine.cpp" />
     <ClCompile Include="Framework.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -243,6 +244,7 @@
     <ClInclude Include="..\thirdparty\SDL2\include\SDL_vulkan.h" />
     <ClInclude Include="Animator.h" />
     <ClInclude Include="AssetManager.h" />
+    <ClInclude Include="Collision.h" />
     <ClInclude Include="Consts.h" />
     <ClInclude Include="engine.h" />
     <ClInclude Include="Framework.h" />

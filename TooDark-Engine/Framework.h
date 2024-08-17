@@ -5,6 +5,7 @@
 #include <imgui_impl_sdlrenderer2.h>
 
 #include"GameObject.h"
+#include"Collision.h"
 #include"engine.h"
 
 
@@ -33,7 +34,7 @@ struct Framework
     SDL_Renderer* pRenderer;
     int mX, mY;
 
-    bool drawGizmos = false;
+    bool drawGizmos = true;
     SDL_Texture* pRenderTarget; // Render Target
     Engine _engine;
     GameObject* player;

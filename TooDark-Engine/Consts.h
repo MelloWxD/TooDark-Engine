@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include <SDL.H>
+#include<array>
 #include <SDL_image.h>
 using v2 = glm::vec2;
 using v3 = glm::vec3;
@@ -26,9 +27,9 @@ struct TDark_Clock
 		startPoint = std::chrono::steady_clock::now();
 		tick = true;
 	}
-	float getTimeSinceStart()
+	long int getTimeSinceStart()
 	{
-		return std::chrono::duration_cast<std::chrono::seconds>(getTimeNow() - startPoint).count();
+		return std::chrono::duration_cast<std::chrono::milliseconds>(getTimeNow() - startPoint).count();
 
 	}
 	void reset()

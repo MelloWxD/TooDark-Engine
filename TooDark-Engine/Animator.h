@@ -6,7 +6,7 @@ class GameObject;
 
 struct Animation
 {
-	float speed = 1.f; // How long to wait in Seconds before switching frames
+	int speed = 60; // How long to wait in ms before switching frames
 	std::string name;
 	bool play = true;
 
