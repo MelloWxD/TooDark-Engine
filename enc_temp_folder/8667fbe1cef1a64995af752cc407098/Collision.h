@@ -3,18 +3,10 @@
 #include"Consts.h"
 class GameObject;
 
+#define GJK_MAX_ITER 50
 
 namespace Collisions
 {
-
-	struct CollisionInfo
-	{
-		GameObject* pGameObj_r = nullptr;
-		GameObject* pGameObj_l = nullptr;
-		bool HasCollision = false;
-		v2 normal = v2(0);
-		float Depth = 0.f;
-	};
 	enum ColliderType : uint16_t
 	{
 		kNONE = 0u,
@@ -24,7 +16,9 @@ namespace Collisions
 		kOBB = 4u
 	};
 
-	class Collider // Abstract base class
+	
+
+	class Collider
 	{
 	public:
 		v2 position;
@@ -36,6 +30,8 @@ namespace Collisions
 		
 	};
 
+	v2 tripleProduct(v2 a, v2 b, v2 c);
+	
 	class Circle : virtual public Collider
 	{
 	public:
@@ -55,7 +51,7 @@ namespace Collisions
 		v2 t2;
 		v2 t3;
 		void update(v2 Parent_Pos);
-		
+
 		std::vector<v2> getColliderVerts() override;
 	private:
 		std::vector<v2> _verts = { v2(1, 0), v2(1, 1), v2(0, 1) };
@@ -70,13 +66,28 @@ namespace Collisions
 		
 		void update(v2 Parent_Pos);
 		
+		v2 FurthestPoint(v2 Direction); // find the furthest point in a given direction
 		
 		SDL_Rect getRect();
 		
 
 		v2 extents;
 	};
+	
+	
+
+	struct CollisionInfo
+	{
+		GameObject* pGameObj_r = nullptr;
+		GameObject* pGameObj_l = nullptr;
+		bool HasCollision = false;
+		v2 normal = v2(0);
+		float Depth = 0.f;
+	};
+
+	bool isOverlapping(Collider* l_aabb, Collider* r_aabb, CollisionInfo& colInfo);
 	bool isOverlappingSAT(Collider* lHB, Collider* rHB, CollisionInfo& colInfo);
 	CollisionInfo CheckCollisions(GameObject* l_gobj, GameObject* r_gobj);
+	void Resolve(CollisionInfo info);
 	void ResolveSAT(CollisionInfo info);
 }
