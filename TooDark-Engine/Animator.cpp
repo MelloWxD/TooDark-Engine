@@ -13,7 +13,7 @@ void Animator::playAnimOnce(int animIdx)
 {
 	if (single)
 	{
-		return; // stop spamming the animation queue
+		return; // prevent spamming the animation queue
 	}
 	pPreviousAnim = pCurrentAnim;
 	pCurrentAnim = &_vAnimations[animIdx];
@@ -34,8 +34,10 @@ void Animator::update()
 		int f = Clock.getTimeSinceStart();
 		if (f >= pCurrentAnim->speed)
 		{
-			_currentFrame = (_currentFrame + 1) % (pCurrentAnim->_vAnimationSprites.size());
-			if (_currentFrame == pCurrentAnim->_vAnimationSprites.size()-1 && single)
+			_currentFrame = (_currentFrame + 1) % (pCurrentAnim->_vAnimationSprites.size()); // looping playback
+
+
+			if (_currentFrame == pCurrentAnim->_vAnimationSprites.size()-1 && single) // chech for single loop of animation
 			{
 				single = false;
 				if (pPreviousAnim != nullptr)
