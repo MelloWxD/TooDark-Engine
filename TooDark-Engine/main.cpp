@@ -33,12 +33,10 @@ int main(int argc, char* argv[])
     }
 
     fw._vGameObjects.push_back(GameObject(&fw, "test"));
-    fw._vGameObjects.push_back(GameObject(&fw, "amogus"));
    
-    fw.player = &fw._vGameObjects[1];
+    fw.player = &fw._vGameObjects[0];
 
-    fw._vGameObjects[1].position = v2(150, 0);
-    fw._vGameObjects[0].position = v2(0, 0);
+    fw._vGameObjects[0].position = v2(150, 0);
     // main loop
     while (isRunning)
     {

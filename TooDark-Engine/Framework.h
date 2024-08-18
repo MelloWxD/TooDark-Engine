@@ -35,6 +35,7 @@ struct Framework
     int mX, mY;
 
     bool drawGizmos = true;
+    bool polygonEditMode = false;
     SDL_Texture* pRenderTarget; // Render Target
     Engine _engine;
     GameObject* player;

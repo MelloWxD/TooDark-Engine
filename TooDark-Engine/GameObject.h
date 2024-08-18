@@ -23,7 +23,6 @@ public:
 	v2 Scale = v2(100, 200);
 
 	bool col = false;
-	bool _static = false;
 	SDL_Rect _rect = { (int) position.x,(int) position.y,(int)Scale.x,(int)Scale.y }; // used for the drawing of the image
 
 	Collisions::Collider* _hitbox;

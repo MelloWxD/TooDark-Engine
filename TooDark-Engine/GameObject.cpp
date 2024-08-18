@@ -18,6 +18,7 @@ GameObject::GameObject(Framework* pFw, std::string TextureID, std::string Name, 
 	texID = TextureID;
 	_animator.playAnim(0);
 }
+
 void GameObject::ChangeSprite(SDL_Texture* tx)
 {
 	pTexImg = tx;

@@ -36,6 +36,11 @@ namespace Collisions
 		ColliderType _type = ColliderType::kNONE;
 		std::vector<v2> _verts;
 		virtual SDL_Rect getRect() = 0;
+		bool _static = false;
+		void setExtents(v2 e)
+		{
+			extents = e;
+		}
 		virtual std::vector<v2> getColliderVerts() = 0;
 		virtual void update(v2 parent_pos) = 0;
 		virtual void DrawGizmo(SDL_Renderer* pRender) = 0;
@@ -56,15 +61,13 @@ namespace Collisions
 	public:
 		Triangle();
 		Triangle(v2 t1, v2 t2,v2 t3);
-		v2 t1;
-		v2 t2;
-		v2 t3;
 		void update(v2 Parent_Pos) override;
+
 		void DrawGizmo(SDL_Renderer* pRender) override;
 		SDL_Rect getRect() override;
+
+		std::vector<v2> getGizmoColliderVerts();
 		std::vector<v2> getColliderVerts() override;
-	private:
-		std::vector<v2> _verts = { v2(1, 0), v2(1, 1), v2(0, 1) };
 	};
 	
 	class AABB : virtual public Collider
@@ -78,10 +81,9 @@ namespace Collisions
 		
 		void DrawGizmo(SDL_Renderer* pRender) override;
 
-		SDL_Rect getRect();
+		SDL_Rect getRect() override;
 		
 
-		v2 extents;
 	};
 
 	class Polygon : virtual public Collider

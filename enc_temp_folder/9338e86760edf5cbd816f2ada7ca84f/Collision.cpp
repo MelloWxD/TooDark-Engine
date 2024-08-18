@@ -54,7 +54,7 @@ bool Collisions::isOverlappingSAT(Collider* pLHB, Collider* pRHB, CollisionInfo&
 			}
 			// Find the minimum overlap distance between the two shapes
 			pen_depth = std::min(std::min(max_r1, max_r2) - std::max(min_r1, min_r2), pen_depth);
-			if (!(max_r2 >= min_r1 && max_r1 >= min_r2))
+			if (!(max_r2 >= min_r1 && max_r1 >= min_r2) && (lHB->_type == Collisions::kAABB && rHB->_type == Collisions::kAABB))
 			{
 				return false;
 			}

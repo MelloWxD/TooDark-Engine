@@ -1,5 +1,8 @@
 #include "Framework.h"
 int xyzw[4] = { 0,0,0,0 };
+int ex[2] = { 0,0 };
+int of[2] = { 0,0 };
+int t[2] = { 0,0 };
 int imguiTempBuff[64] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 int arr[4] = { 0,0,0,0 };
 float xyzwf[4] = { 0,0,0,0 };
@@ -27,26 +30,27 @@ void dragTransform(GameObject& go)
 }
 void dragAABBHitbox(GameObject& go)
 {
-    arr[0] = go._hitbox->extents.x;
-    arr[1] = go._hitbox->extents.y;
-    arr[2] = go._hitbox->offset.x;
-    arr[3] = go._hitbox->offset.y;
+    ex[0] = go._hitbox->extents.x;
+    ex[1] = go._hitbox->extents.y;
 
-    ImGui::DragInt2("Extents", arr, 1, -1000, 1500, "%d");
+    of[0] = go._hitbox->offset.x;
+    of[1] = go._hitbox->offset.y;
+
+    ImGui::DragInt2("Extents", ex, 1, -1000, 1500, "%d");
     Spacing(2);
-    ImGui::DragInt2("Offset", &arr[2], 1, -1000, 1500, "%d");
+    ImGui::DragInt2("Offset", of, 1, -1000, 1500, "%d");
 
-    go._hitbox->extents.x = arr[0];
-    go._hitbox->extents.y = arr[1];
-    go._hitbox->offset.x = arr[2];
-    go._hitbox->offset.y = arr[3];
+    auto e = v2(ex[0], ex[1]);
+    go._hitbox->setExtents(e);
+    go._hitbox->offset.x = of[0];
+    go._hitbox->offset.y = of[1];
 
 
 }
 void dragTriangleHitbox(GameObject& go)
 {
-    auto v = go._hitbox->getColliderVerts();
-    int idx = 2;
+    auto v = { go._hitbox->t1, go._hitbox->t2, go._hitbox->t3 };
+    int idx = 0;
    
     for (auto p : v) // for each triangle point
     {
@@ -60,23 +64,46 @@ void dragTriangleHitbox(GameObject& go)
     ImGui::DragInt2("Offset", xyzw, 1, -1000, 1500, "%d");
     Spacing(2);
     
-    ImGui::DragInt2("Point #1", imguiTempBuff + sizeof(float) * 2, 1, -1000, 1500, "%d");
+    ImGui::DragInt2("Point #1", imguiTempBuff, 1, -1000, 1500, "%d");
     Spacing(2);
-    ImGui::DragInt2("Point #2", imguiTempBuff + sizeof(float) * 4, 1, -1000, 1500, "%d");
+    ImGui::DragInt2("Point #2", &imguiTempBuff[2], 1, -1000, 1500, "%d");
     Spacing(2);
-    ImGui::DragInt2("Point #3", imguiTempBuff + sizeof(float) * 6, 1, -1000, 1500, "%d");
+    ImGui::DragInt2("Point #3", &imguiTempBuff[4], 1, -1000, 1500, "%d");
 
-    go._hitbox->t1.x = imguiTempBuff[2];
-    go._hitbox->t1.y = imguiTempBuff[3];  
+    go._hitbox->t1.x = imguiTempBuff[0];
+    go._hitbox->t1.y = imguiTempBuff[1];  
     
-    go._hitbox->t2.x = imguiTempBuff[4];
-    go._hitbox->t2.y = imguiTempBuff[5];  
+    go._hitbox->t2.x = imguiTempBuff[2];
+    go._hitbox->t2.y = imguiTempBuff[3];  
     
-    go._hitbox->t3.x = imguiTempBuff[6];
-    go._hitbox->t3.y = imguiTempBuff[7];
+    go._hitbox->t3.x = imguiTempBuff[4];
+    go._hitbox->t3.y = imguiTempBuff[5];
 
   
     go._hitbox->offset = v2(xyzw[0], xyzw[1]);
+
+}
+
+
+void dragPolygonHitbox(GameObject& go)
+{
+    auto v = go._hitbox->getColliderVerts();
+    int idx = 0;
+    for (auto p : v) // for each vertex of the polygon
+    {
+        imguiTempBuff[idx] = p.x;
+        imguiTempBuff[idx + 1] = p.y; // line them up in [x1,y1, x2, y2 ... ] format
+        idx += 2;
+    }
+
+    for (int i = 0; i < v.size() / 2; i += 2)
+    {
+        std::string s = "Point #" + std::to_string(i);
+        ImGui::DragInt2(s.c_str(), &imguiTempBuff[i], 1, -1000, 1500);
+
+
+    }
+
 
 }
 void dragVec2(const char* Label, v2& v, int speed, int min, int max)
@@ -333,6 +360,11 @@ void Framework::poll_events(bool& isRunning)
         {
             if (e.key.keysym.sym == SDLK_ESCAPE) // Toggle Lock the mouse when g is pressed
             {
+                if (polygonEditMode)
+                {
+                    polygonEditMode = false;
+                    break;
+                }
                 isRunning = false;
                 ImGui::EndFrame();
                 break;
@@ -537,7 +569,7 @@ void Framework::draw_imgui()
 
             if (ImGui::TreeNode("Hitbox Editor"))
             { 
-                ImGui::Checkbox("Static?", &GO._static);
+                ImGui::Checkbox("Static?", &GO._hitbox->_static);
 
                 ImGui::Text("Change Collider Type");
                 ImGui::SameLine();
