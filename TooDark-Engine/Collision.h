@@ -2,7 +2,7 @@
 
 #include"Consts.h"
 class GameObject;
-
+class SDL_Renderer;
 
 namespace Collisions
 {
@@ -28,13 +28,17 @@ namespace Collisions
 	class Collider // Abstract base class
 	{
 	public:
-		v2 position;
-		v2 offset;
-		v2 centre;
+		v2 position = v2(0);
+		v2 offset = v2(0);
+		v2 centre = v2(0);
+		v2 extents = v2(0);
+		v2 t1, t2, t3;
 		ColliderType _type = ColliderType::kNONE;
 		std::vector<v2> _verts;
+		virtual SDL_Rect getRect() = 0;
 		virtual std::vector<v2> getColliderVerts() = 0;
-		
+		virtual void update(v2 parent_pos) = 0;
+		virtual void DrawGizmo(SDL_Renderer* pRender) = 0;
 	};
 
 	class Circle : virtual public Collider
@@ -55,8 +59,9 @@ namespace Collisions
 		v2 t1;
 		v2 t2;
 		v2 t3;
-		void update(v2 Parent_Pos);
-		
+		void update(v2 Parent_Pos) override;
+		void DrawGizmo(SDL_Renderer* pRender) override;
+		SDL_Rect getRect() override;
 		std::vector<v2> getColliderVerts() override;
 	private:
 		std::vector<v2> _verts = { v2(1, 0), v2(1, 1), v2(0, 1) };
@@ -69,9 +74,10 @@ namespace Collisions
 		
 		std::vector<v2> getColliderVerts() override;
 		
-		void update(v2 Parent_Pos);
+		void update(v2 Parent_Pos) override;
 		
-		
+		void DrawGizmo(SDL_Renderer* pRender) override;
+
 		SDL_Rect getRect();
 		
 
@@ -80,11 +86,18 @@ namespace Collisions
 
 	class Polygon : virtual public Collider
 	{
+	public:
 		Polygon(std::vector<v2> Points);
 		Polygon();
 		void AddPoint(v2 point);
+
 		void removePoint(int idx);
-		std::vector<v2> getColliderVerts();
+		void DrawGizmo(SDL_Renderer* pRender) override;
+
+		void update(v2 Parent_Pos) override;
+
+		SDL_Rect getRect() override;
+		std::vector<v2> getColliderVerts() override;
 	};
 	bool isOverlappingSAT(Collider* lHB, Collider* rHB, CollisionInfo& colInfo);
 	CollisionInfo CheckCollisions(GameObject* l_gobj, GameObject* r_gobj);

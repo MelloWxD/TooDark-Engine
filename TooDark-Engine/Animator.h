@@ -17,15 +17,19 @@ struct Animation
 struct Animator
 {
 	void playAnim(int animIdx);
+
+	void playAnimOnce(int animIdx);
 	
 	void update();
 	
 	GameObject* pGameObj;
 	bool play = false;
+	bool single = false;
 	int _currentAnimIdx = 0;
 	int _currentFrame = 0;
 	TDark_Clock Clock;
 	Animation* pCurrentAnim;
+	Animation* pPreviousAnim;
 	std::vector<Animation> _vAnimations;
 
 	bool next = false;

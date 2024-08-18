@@ -1,5 +1,6 @@
 #include "Framework.h"
 int xyzw[4] = { 0,0,0,0 };
+int imguiTempBuff[64] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 int arr[4] = { 0,0,0,0 };
 float xyzwf[4] = { 0,0,0,0 };
 void Spacing(int space)
@@ -24,22 +25,58 @@ void dragTransform(GameObject& go)
     go.Scale.x = xyzw[2];
     go.Scale.y = xyzw[3];
 }
-void dragHitbox(GameObject& go)
+void dragAABBHitbox(GameObject& go)
 {
-    arr[0] = go._hitbox.extents.x;
-    arr[1] = go._hitbox.extents.y;
-    arr[2] = go._hitbox.offset.x;
-    arr[3] = go._hitbox.offset.y;
+    arr[0] = go._hitbox->extents.x;
+    arr[1] = go._hitbox->extents.y;
+    arr[2] = go._hitbox->offset.x;
+    arr[3] = go._hitbox->offset.y;
 
     ImGui::DragInt2("Extents", arr, 1, -1000, 1500, "%d");
     Spacing(2);
     ImGui::DragInt2("Offset", &arr[2], 1, -1000, 1500, "%d");
 
-    go._hitbox.extents.x = arr[0];
-    go._hitbox.extents.y = arr[1];
-    go._hitbox.offset.x = arr[2];
-    go._hitbox.offset.y = arr[3];
+    go._hitbox->extents.x = arr[0];
+    go._hitbox->extents.y = arr[1];
+    go._hitbox->offset.x = arr[2];
+    go._hitbox->offset.y = arr[3];
 
+
+}
+void dragTriangleHitbox(GameObject& go)
+{
+    auto v = go._hitbox->getColliderVerts();
+    int idx = 2;
+   
+    for (auto p : v) // for each triangle point
+    {
+        imguiTempBuff[idx] = p.x;
+        imguiTempBuff[idx+1] = p.y;
+        idx +=2;
+    }
+    xyzw[0] = go._hitbox->offset.x;
+    xyzw[1] = go._hitbox->offset.y;
+    // Each point will be lined up [x1, y1, x2, y2 ... ]
+    ImGui::DragInt2("Offset", xyzw, 1, -1000, 1500, "%d");
+    Spacing(2);
+    
+    ImGui::DragInt2("Point #1", imguiTempBuff + sizeof(float) * 2, 1, -1000, 1500, "%d");
+    Spacing(2);
+    ImGui::DragInt2("Point #2", imguiTempBuff + sizeof(float) * 4, 1, -1000, 1500, "%d");
+    Spacing(2);
+    ImGui::DragInt2("Point #3", imguiTempBuff + sizeof(float) * 6, 1, -1000, 1500, "%d");
+
+    go._hitbox->t1.x = imguiTempBuff[2];
+    go._hitbox->t1.y = imguiTempBuff[3];  
+    
+    go._hitbox->t2.x = imguiTempBuff[4];
+    go._hitbox->t2.y = imguiTempBuff[5];  
+    
+    go._hitbox->t3.x = imguiTempBuff[6];
+    go._hitbox->t3.y = imguiTempBuff[7];
+
+  
+    go._hitbox->offset = v2(xyzw[0], xyzw[1]);
 
 }
 void dragVec2(const char* Label, v2& v, int speed, int min, int max)
@@ -54,16 +91,7 @@ void dragVec2(const char* Label, v2& v, int speed, int min, int max)
     v.y = xyzw[1];
 }
 
-void dragAABBHitbox(GameObject& go)
-{
-    auto& hb = go._hitbox;
- 
-    dragVec2("Extents", hb.extents, 0.5f, -FLT_MAX, FLT_MAX);
-    Spacing(3);
-    dragVec2("Offset", hb.offset, 0.5f, -FLT_MAX, FLT_MAX);
 
-   
-}
 
 
 void dragVec4(const char* Label, v4& v, int speed, int min, int max)
@@ -323,7 +351,11 @@ void Framework::poll_events(bool& isRunning)
                 break;
             case SDLK_s:
                 player->velocity.y = 1;
+                break; 
+            case SDLK_SPACE:
+                player->_animator.playAnimOnce(1);
                 break;
+
             }
             
         }
@@ -421,9 +453,14 @@ void Framework::draw_imgui()
 
             // Name Editor
             {
-                static std::string password = GO._name;
-                ImGui::InputText("Name", (char*)password.c_str(), IM_ARRAYSIZE(password.c_str()));
-                GO._name = password;
+              static std::string password = GO._name;
+              ImGui::InputText("Name", (char*)password.c_str(), IM_ARRAYSIZE(password.c_str()));
+              ImGui::SameLine();
+              if (ImGui::Button("Confirm"))
+              {
+
+                  GO._name = password;
+              }
             }
 
             // Transform Edits
@@ -502,16 +539,39 @@ void Framework::draw_imgui()
             { 
                 ImGui::Checkbox("Static?", &GO._static);
 
-                dragHitbox(GO);
-                switch (GO._hitbox._type)
+                ImGui::Text("Change Collider Type");
+                ImGui::SameLine();
+                if (ImGui::SmallButton("AABB"))
+                {
+                    GO._hitbox = new Collisions::AABB();
+                }  
+                ImGui::SameLine();
+                if (ImGui::SmallButton("Triangle"))
+                {
+                    GO._hitbox = new Collisions::Triangle();
+                }   
+                ImGui::SameLine();
+                if (ImGui::SmallButton("Polygon"))
+                {
+                    GO._hitbox = new Collisions::Polygon();
+                }
+
+
+                switch (GO._hitbox->_type)
                 {
                 case Collisions::ColliderType::kAABB:
-                   
+                    dragAABBHitbox(GO);
                     break;
 
+                case Collisions::ColliderType::kTriangle:
+                dragTriangleHitbox(GO);
+                break;
 
+                case Collisions::ColliderType::kPolygon:
+                    break;
 
-              
+                default:
+                    break;
                 }
 
 

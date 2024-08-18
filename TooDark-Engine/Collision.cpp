@@ -1,6 +1,6 @@
 #include "Collision.h"
 #include"GameObject.h"
-
+#include"Consts.h"
 
 
 bool Collisions::isOverlappingSAT(Collider* pLHB, Collider* pRHB, CollisionInfo& colInfo)
@@ -65,7 +65,7 @@ Collisions::CollisionInfo Collisions::CheckCollisions(GameObject* l_gobj, GameOb
 	CollisionInfo info;
 	
 	
-	if (isOverlappingSAT(&l_gobj->_hitbox, &r_gobj->_hitbox, info))
+	if (isOverlappingSAT(l_gobj->_hitbox, r_gobj->_hitbox, info))
 	{
 		info.pGameObj_l = l_gobj;
 		info.pGameObj_r = r_gobj;
@@ -116,8 +116,7 @@ void Collisions::ResolveSAT(CollisionInfo info)
 		obj2->position.x += (-info.normal.x * info.Depth) * 0.5f;
 		obj2->position.y += (-info.normal.y * info.Depth) * 0.5f;
 	}
-	obj1->_hitbox.update(obj1->position);
-	obj2->_hitbox.update(obj2->position);
+
 }
 
 Collisions::Circle::Circle()
@@ -176,7 +175,11 @@ void Collisions::AABB::update(v2 Parent_Pos)
 
 }
 
-
+void Collisions::Polygon::update(v2 parent_pos)
+{
+	position = parent_pos;
+	centre = parent_pos + offset;
+}
 
 SDL_Rect Collisions::AABB::getRect()
 {
@@ -186,6 +189,20 @@ SDL_Rect Collisions::AABB::getRect()
 	int h = extents.y * 2;
 
 	return SDL_Rect{ .x = x, .y = y, .w = w, .h = h };
+}
+
+void Collisions::AABB::DrawGizmo(SDL_Renderer* pRender)
+{
+	auto rect = this->getRect();
+	Uint8 r;
+	Uint8 g;
+	Uint8 b;
+	Uint8 a;
+	SDL_GetRenderDrawColor(pRender, &r, &g, &b, &a);
+	SDL_SetRenderDrawColor(pRender, 255, 255, 255, 255);
+	SDL_RenderDrawRect(pRender, &rect);
+	SDL_SetRenderDrawColor(pRender, r, g, b, a);
+
 }
 
 Collisions::Triangle::Triangle()
@@ -211,6 +228,30 @@ void Collisions::Triangle::update(v2 Parent_Pos)
 {
 	position = Parent_Pos;
 	centre = Parent_Pos + offset;
+}
+
+SDL_Rect Collisions::Triangle::getRect()
+{
+	return SDL_Rect();
+}
+
+void Collisions::Triangle::DrawGizmo(SDL_Renderer* pRender)
+{
+	Uint8 r;
+	Uint8 g;
+	Uint8 b;
+	Uint8 a;
+	SDL_GetRenderDrawColor(pRender, &r, &g, &b, &a);
+	SDL_SetRenderDrawColor(pRender, 0, 255, 0, 255);
+	SDL_RenderDrawPointF(pRender, offset.x, offset.y);
+	SDL_SetRenderDrawColor(pRender, 255, 255, 255, 255);
+	SDL_RenderDrawLine(pRender, offset.x + t1.x, offset.y + t1.y, offset.x + t2.x, offset.y + t2.y);
+	SDL_RenderDrawLine(pRender, offset.x + t2.x, offset.y + t2.y, offset.x + t3.x, offset.y + t3.y);
+	SDL_RenderDrawLine(pRender, offset.x + t3.x, offset.y + t3.y, offset.x + t1.x, offset.y + t1.y);
+
+	SDL_SetRenderDrawColor(pRender, r, g, b, a);
+
+
 }
 
 std::vector<v2> Collisions::Triangle::getColliderVerts()
@@ -246,4 +287,13 @@ void Collisions::Polygon::removePoint(int idx)
 std::vector<v2> Collisions::Polygon::getColliderVerts()
 {
 	return _verts;
+}
+
+SDL_Rect Collisions::Polygon::getRect()
+{
+	return SDL_Rect();
+}
+
+void Collisions::Polygon::DrawGizmo(SDL_Renderer* pRender)
+{
 }

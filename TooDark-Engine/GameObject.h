@@ -26,7 +26,7 @@ public:
 	bool _static = false;
 	SDL_Rect _rect = { (int) position.x,(int) position.y,(int)Scale.x,(int)Scale.y }; // used for the drawing of the image
 
-	Collisions::AABB _hitbox;
+	Collisions::Collider* _hitbox;
 
 	int current_AnimFrame = 0;
 	Animator _animator;

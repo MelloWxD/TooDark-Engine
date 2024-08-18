@@ -80,20 +80,19 @@ int main(int argc, char* argv[])
           
             if (fw.drawGizmos)
             {
-                auto r = go._hitbox.getRect();
-
-                SDL_SetRenderDrawColor(fw.pRenderer, 0, 0, 255, 255);
-                SDL_RenderDrawPoint(fw.pRenderer, go._hitbox.centre.x, go._hitbox.centre.y);
-                for (auto& v : go._hitbox.getColliderVerts())
+                
+                go._hitbox->DrawGizmo(fw.pRenderer);
+              /*  SDL_SetRenderDrawColor(fw.pRenderer, 0, 0, 255, 255);
+                SDL_RenderDrawPoint(fw.pRenderer, go._hitbox->centre.x, go._hitbox->centre.y);
+                for (auto& v : go._hitbox->getColliderVerts())
                 {
                     SDL_RenderDrawPoint(fw.pRenderer, v.x, v.y);
                 }
                 SDL_SetRenderDrawColor(fw.pRenderer, 255, 255, 255, 255);
                 (go.col) ? SDL_SetRenderDrawColor(fw.pRenderer, 0, 255, 0, 255) : SDL_SetRenderDrawColor(fw.pRenderer, 255, 0, 0, 255);
+*/
 
 
-
-                SDL_RenderDrawRect(fw.pRenderer, &r);
                 //SDL_RenderDrawPointF(fw.pRenderer, go.position.x, go.position.y);
             }
         }
