@@ -3,11 +3,27 @@
 
 
 class Animation;
+class Framework;
+class GameObject;
 
+#include<rapidjson/document.h>
+#include<rapidjson/filereadstream.h>
+#include<rapidjson/prettywriter.h>
+#include<rapidjson\stringbuffer.h>
 
+class Serializer
+{
+public:
+	void savePrefabToJson(GameObject* pGO, const char* name);
+    
+	void savePrefabsToJson(const char* name);
+
+	std::vector<GameObject> _vPrefabs;
+};
 class AssetManager
 {
 public:
+	
 	/// <summary>
 	/// Load an image from file then store it into the map
 	/// </summary>
@@ -17,6 +33,8 @@ public:
 	
 	void loadAnimation(SDL_Renderer* pRenderer, const char* fullAnimDirectoryPath, std::string animName);
 	
+
+	void loadAssetsFromMasterPath(std::string root_dir, Framework& fw);
 
 	/// <summary>
 	/// Retrieve texture by ID from the cached map
@@ -34,5 +52,6 @@ public:
 
 	std::unordered_map<std::string, SDL_Texture*> _texMap;
 	std::unordered_map<std::string, Animation> _animationMap;
+	Serializer _serializer;
 };
 

@@ -1,46 +1,55 @@
 #pragma once
 #include"Consts.h"
-#include <imgui.h>
-#include <imgui_impl_sdl2.h>
-#include <imgui_impl_sdlrenderer2.h>
+
 
 #include"GameObject.h"
 #include"Collision.h"
 #include"engine.h"
-
+#include"Scene.h"
+#include"Renderer.h"
 
 
 struct Framework
 {
     Framework();
     ~Framework();
-    void init_SDL();
-    void init_imgui();
+
     void cleanup();
    
     void poll_events(bool& isRunning);
-    void new_frame();
-    void draw()
-    {
-        
-    }
-    void draw_imgui();
-   
-    void present()
-    {
 
+    void run(bool& run)
+    {
+        poll_events(run);
+
+        pRenderer->newFrame();
+
+        _vScenes[_sceneIdx].update_objects();
+            
+        pRenderer->Draw();
     }
+  
     SDL_Window* pWindow;
-    SDL_Renderer* pRenderer;
-    int mX, mY;
+ 
+
+    int mX, mY; // mouse coords relative to SDL window
+    int mVPx, mVPy; // mouse coords relative to Render Target Viewport
+
+    int mVPPx, mVPPy; // mouse coords relative to Render Target Viewport
+    int mVPSx, mVPSy; // mouse coords relative to Render Target Viewport
+
+    int _sceneIdx = 0;
 
     bool drawGizmos = true;
     bool polygonEditMode = false;
-    SDL_Texture* pRenderTarget; // Render Target
+    bool clicked = false;
+
+    
+    Renderer* pRenderer; // 2Dark Renderer Class
+
     Engine _engine;
     GameObject* player;
-    v4 _BgClearClr = v4(255, 0 ,255, 255);
     // things to be moved to engine class
-    std::vector<GameObject> _vGameObjects;
+    std::vector<Scene> _vScenes;
 };
 

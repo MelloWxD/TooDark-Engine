@@ -21,9 +21,9 @@ public:
 	v2 position = v2(0, 0);
 	v2 velocity = v2(0, 0);
 	v2 Scale = v2(100, 200);
-
+	float RotAngle = 0.f;
 	bool col = false;
-	SDL_Rect _rect = { (int) position.x,(int) position.y,(int)Scale.x,(int)Scale.y }; // used for the drawing of the image
+	SDL_FRect _rect = {  position.x, position.y, Scale.x, Scale.y }; // used for the drawing of the image
 
 	Collisions::Collider* _hitbox;
 

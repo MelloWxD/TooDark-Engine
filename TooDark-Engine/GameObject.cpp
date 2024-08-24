@@ -1,7 +1,7 @@
 #include "GameObject.h"
 #include"Framework.h"
 
-float moveSpeed = .035f;
+float moveSpeed = 0.035f;
 
 
 GameObject::GameObject(Framework* pFw, std::string TextureID, std::string Name, v2 Position)
@@ -9,7 +9,7 @@ GameObject::GameObject(Framework* pFw, std::string TextureID, std::string Name, 
 	_hitbox = new Collisions::AABB();
 	_name = Name;
 	// load image
-	_pRenderer = pFw->pRenderer;
+	_pRenderer = pFw->pRenderer->pRenderer;
 	position = Position;
 	_animator.pGameObj = this;
 	_animator._vAnimations.push_back(pFw->_engine._assetManager.getAnim("_Attack"));
@@ -32,7 +32,7 @@ void GameObject::update()
 	position.y += moveSpeed * velocity.y;
 
 	_hitbox->update(position);
-	_rect = { (int)position.x,(int)position.y, (int) Scale.x,(int) Scale.y };
+	_rect = { position.x,position.y, Scale.x, Scale.y };
 
 	_animator.update();
 	if (_animator.next)

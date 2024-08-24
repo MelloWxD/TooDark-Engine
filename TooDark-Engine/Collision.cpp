@@ -2,7 +2,7 @@
 #include"GameObject.h"
 #include"Consts.h"
 
-constexpr float MAX_COL_DEPTH_CUTOFF = 1000.f;
+constexpr float MAX_COL_DEPTH_CUTOFF = 10.f;
 
 bool Collisions::isOverlappingSAT(Collider* pLHB, Collider* pRHB, CollisionInfo& colInfo)
 {
@@ -72,9 +72,9 @@ bool Collisions::isOverlappingSAT(Collider* pLHB, Collider* pRHB, CollisionInfo&
 		{
 			colInfo.Depth = fabs(pen_depth);
 		}
-	if (fabs(pen_depth) <= MAX_COL_DEPTH_CUTOFF)
+	if (fabs(pen_depth) >= MAX_COL_DEPTH_CUTOFF)
 	{
-		colInfo.Depth = 0.0f;
+		colInfo.Depth = 1.0f;
 	}
 	return true;
 }
@@ -96,6 +96,10 @@ Collisions::CollisionInfo Collisions::CheckCollisions(GameObject* l_gobj, GameOb
 
 void Collisions::ResolveSAT(CollisionInfo info)
 {
+	if (info.Depth <= 0)
+	{
+		return;
+	}
 	auto* obj1 = info.pGameObj_l;
 	auto* obj2 = info.pGameObj_r;
 	if (fabs(info.normal.y) < 0.25f)
@@ -118,7 +122,10 @@ void Collisions::ResolveSAT(CollisionInfo info)
 
 		//}
 		obj1->position.x += (info.normal.x * info.Depth) * 0.5f;
-		obj1->position.y += (info.normal.y * info.Depth) * 0.5f;
+		obj1->position.y += (info.normal.y * info.Depth) * 0.5f;	
+		
+		obj1->velocity.x *= 0.5f;
+		obj1->velocity.y *= 0.5f;
 	}
 	if (!obj2->_hitbox->_static)
 	{
@@ -133,6 +140,8 @@ void Collisions::ResolveSAT(CollisionInfo info)
 		//}
 		obj2->position.x += (-info.normal.x * info.Depth) * 0.5f;
 		obj2->position.y += (-info.normal.y * info.Depth) * 0.5f;
+		obj2->velocity.x *= 0.5f;
+		obj2->velocity.y *= 0.5f;
 	}
 
 }
@@ -199,14 +208,14 @@ void Collisions::Polygon::update(v2 parent_pos)
 	centre = parent_pos + offset;
 }
 
-SDL_Rect Collisions::AABB::getRect()
+SDL_FRect Collisions::AABB::getRect()
 {
-	int x = centre.x - extents.x;
-	int y = centre.y - extents.y;
-	int w = (extents.x * 2);
-	int h = (extents.y * 2);
+	float x = centre.x - extents.x;
+	float y = centre.y - extents.y;
+	float w = (extents.x * 2);
+	float h = (extents.y * 2);
 
-	return SDL_Rect{ .x = x, .y = y, .w = w, .h = h };
+	return SDL_FRect{ .x = x, .y = y, .w = w, .h = h };
 }
 
 void Collisions::AABB::DrawGizmo(SDL_Renderer* pRender)
@@ -218,7 +227,7 @@ void Collisions::AABB::DrawGizmo(SDL_Renderer* pRender)
 	Uint8 a;
 	SDL_GetRenderDrawColor(pRender, &r, &g, &b, &a);
 	SDL_SetRenderDrawColor(pRender, 255, 255, 255, 255);
-	SDL_RenderDrawRect(pRender, &rect);
+	SDL_RenderDrawRectF(pRender, &rect);
 	SDL_SetRenderDrawColor(pRender, r, g, b, a);
 
 }
@@ -249,9 +258,9 @@ void Collisions::Triangle::update(v2 Parent_Pos)
 	_verts = { t1, t2, t3 };
 }
 
-SDL_Rect Collisions::Triangle::getRect()
+SDL_FRect Collisions::Triangle::getRect()
 {
-	return SDL_Rect();
+	return SDL_FRect();
 }
 
 void Collisions::Triangle::DrawGizmo(SDL_Renderer* pRender)
@@ -316,9 +325,9 @@ std::vector<v2> Collisions::Polygon::getColliderVerts()
 	return _verts;
 }
 
-SDL_Rect Collisions::Polygon::getRect()
+SDL_FRect Collisions::Polygon::getRect()
 {
-	return SDL_Rect();
+	return SDL_FRect();
 }
 
 void Collisions::Polygon::DrawGizmo(SDL_Renderer* pRender)

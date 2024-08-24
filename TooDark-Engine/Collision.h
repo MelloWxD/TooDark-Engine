@@ -35,8 +35,9 @@ namespace Collisions
 		v2 t1, t2, t3;
 		ColliderType _type = ColliderType::kNONE;
 		std::vector<v2> _verts;
-		virtual SDL_Rect getRect() = 0;
+		virtual SDL_FRect getRect() = 0;
 		bool _static = false;
+		bool _isTrigger = false;
 		void setExtents(v2 e)
 		{
 			extents = e;
@@ -64,7 +65,7 @@ namespace Collisions
 		void update(v2 Parent_Pos) override;
 
 		void DrawGizmo(SDL_Renderer* pRender) override;
-		SDL_Rect getRect() override;
+		SDL_FRect getRect() override;
 
 		std::vector<v2> getGizmoColliderVerts();
 		std::vector<v2> getColliderVerts() override;
@@ -81,7 +82,7 @@ namespace Collisions
 		
 		void DrawGizmo(SDL_Renderer* pRender) override;
 
-		SDL_Rect getRect() override;
+		SDL_FRect getRect() override;
 		
 
 	};
@@ -98,7 +99,7 @@ namespace Collisions
 
 		void update(v2 Parent_Pos) override;
 
-		SDL_Rect getRect() override;
+		SDL_FRect getRect() override;
 		std::vector<v2> getColliderVerts() override;
 	};
 	bool isOverlappingSAT(Collider* lHB, Collider* rHB, CollisionInfo& colInfo);
